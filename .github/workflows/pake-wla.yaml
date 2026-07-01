@@ -1,0 +1,39 @@
+name: Build WLA App (Seguro)
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'The URL you want to package'
+        required: true
+        default: 'https://painel.wlasaas.com/'
+      name:
+        description: 'The application name'
+        required: true
+        default: 'WLA SAAS'
+
+jobs:
+  build:
+    name: Build Release
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Pake CLI
+        run: npm install -g pake-cli
+
+      - name: Build MSI Installer
+        run: pake ${{ github.event.inputs.url }} --name "${{ github.event.inputs.name }}" --force-internal-navigation
+
+      - name: Upload Installer Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WLA-SAAS-Installer
+          path: |
+            *.msi
+            *.exe
